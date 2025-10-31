@@ -8,6 +8,8 @@ El proyecto ya está configurado con:
 - ✅ `.railwayignore` para excluir archivos innecesarios
 - ✅ Soporte para `DATABASE_URL` de Railway
 - ✅ Configuración SSL para PostgreSQL en la nube
+- ✅ Polyfill de crypto para compatibilidad con NestJS/TypeORM
+- ✅ TypeScript configurado para CommonJS (compatibilidad con Railway)
 
 ### 2. Crear cuenta en Railway
 1. Ve a [railway.app](https://railway.app)
@@ -114,6 +116,14 @@ railway run npm run seed
 
 ## Solución de Problemas
 
+### ❌ ReferenceError: crypto is not defined
+**Error resuelto** - El proyecto ya incluye un polyfill de crypto en `src/main.ts` que soluciona este problema común con NestJS/TypeORM en Railway.
+
+Si el error persiste:
+1. Verifica que el build se haya completado correctamente
+2. Asegúrate de que el archivo `dist/main.js` incluya el polyfill (líneas 36-39)
+3. Revisa que `tsconfig.json` use `"module": "commonjs"`
+
 ### Error de conexión a la base de datos
 - Verifica que PostgreSQL esté agregado al proyecto
 - Asegúrate de que `DATABASE_URL` esté disponible
@@ -122,6 +132,7 @@ railway run npm run seed
 ### Error de build
 - Verifica que todas las dependencias estén en `dependencies` (no en `devDependencies`)
 - Asegúrate de que TypeScript compile correctamente: `npm run build`
+- Si hay errores de TypeScript, revisa `tsconfig.json`
 
 ### Error de puerto
 - Railway asigna el puerto automáticamente via la variable `PORT`
@@ -129,6 +140,11 @@ railway run npm run seed
 
 ### SSL/TLS Error
 - Ya está configurado en `app.module.ts` con `rejectUnauthorized: false`
+
+### Module not found errors
+- Ejecuta `npm install` localmente y asegúrate de que todas las dependencias estén en `package.json`
+- Verifica que el `package-lock.json` esté actualizado
+- Railway ejecutará `npm install` automáticamente durante el deploy
 
 ## Monitoreo
 
