@@ -21,10 +21,14 @@ El proyecto ya está configurado con:
 3. Autoriza Railway para acceder a tu repositorio
 4. Selecciona tu repositorio backend
 
-### 4. Agregar PostgreSQL
-1. En tu proyecto Railway, click en "New"
-2. Selecciona "Database" → "Add PostgreSQL"
+### 4. Agregar PostgreSQL ⚠️ IMPORTANTE
+1. En tu proyecto Railway, click en "**+ New**"
+2. Selecciona "**Database**" → "**Add PostgreSQL**"
 3. Railway creará automáticamente la base de datos y la variable `DATABASE_URL`
+
+**🚨 ESTO ES CRÍTICO:** Sin PostgreSQL, la aplicación no podrá conectarse a ninguna base de datos y fallará con error `ECONNREFUSED ::1:5432`.
+
+**📖 Guía detallada:** Ver [RAILWAY-POSTGRESQL-SETUP.md](./RAILWAY-POSTGRESQL-SETUP.md) si tienes problemas.
 
 ### 5. Configurar Variables de Entorno
 En el panel de tu servicio backend, ve a "Variables" y agrega:

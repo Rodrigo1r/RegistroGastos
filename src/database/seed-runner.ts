@@ -1,54 +1,61 @@
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import { config } from 'dotenv';
 
-config();
+export async function runSeed(configService: ConfigService) {
+  const databaseUrl = configService.get('DATABASE_URL');
 
-const configService = new ConfigService();
-const databaseUrl = configService.get('DATABASE_URL');
+  console.log('🌱 Starting seed process...');
+  console.log('🔍 DATABASE_URL exists:', !!databaseUrl);
 
-console.log('🔍 Seed Configuration:');
-console.log('  - DATABASE_URL exists:', !!databaseUrl);
-
-let dataSourceConfig: any = {
-  type: 'postgres',
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: true,
-};
-
-if (databaseUrl) {
-  // Railway proporciona DATABASE_URL
-  console.log('✅ Using DATABASE_URL for seed');
-  dataSourceConfig = {
-    ...dataSourceConfig,
-    url: databaseUrl,
-    ssl: {
-      rejectUnauthorized: false,
-    },
+  let dataSourceConfig: any = {
+    type: 'postgres',
+    entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+    synchronize: true,
   };
-} else {
-  // Configuración local
-  console.log('⚠️  Using individual DB variables for seed');
-  dataSourceConfig = {
-    ...dataSourceConfig,
-    host: configService.get('DB_HOST'),
-    port: configService.get('DB_PORT'),
-    username: configService.get('DB_USERNAME'),
-    password: configService.get('DB_PASSWORD'),
-    database: configService.get('DB_DATABASE'),
-  };
-}
 
-const AppDataSource = new DataSource(dataSourceConfig);
+  if (databaseUrl) {
+    console.log('✅ Using DATABASE_URL for seed');
+    dataSourceConfig = {
+      ...dataSourceConfig,
+      url: databaseUrl,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    };
+  } else {
+    console.log('⚠️  Using individual DB variables for seed');
+    dataSourceConfig = {
+      ...dataSourceConfig,
+      host: configService.get('DB_HOST'),
+      port: configService.get('DB_PORT'),
+      username: configService.get('DB_USERNAME'),
+      password: configService.get('DB_PASSWORD'),
+      database: configService.get('DB_DATABASE'),
+    };
+  }
 
-async function seed() {
+  const AppDataSource = new DataSource(dataSourceConfig);
+
   try {
     await AppDataSource.initialize();
-    console.log('Connected to database');
+    console.log('✅ Connected to database');
+
+    // Verificar si ya existen datos
+    const userRepository = AppDataSource.getRepository('users');
+    const existingUsers = await userRepository.count();
+
+    if (existingUsers > 0) {
+      console.log('⚠️  Database already has data. Skipping seed.');
+      await AppDataSource.destroy();
+      return {
+        success: true,
+        message: 'Database already seeded',
+        skipped: true,
+      };
+    }
 
     // Crear usuario de prueba por defecto
-    const userRepository = AppDataSource.getRepository('users');
     const hashedPassword = await bcrypt.hash('admin123', 10);
 
     await userRepository.save({
@@ -59,7 +66,7 @@ async function seed() {
       isActive: true,
     });
 
-    console.log('Test user created: admin@gastos.com / admin123');
+    console.log('✅ Test user created: admin@gastos.com / admin123');
 
     // Crear tipos de gastos
     const expenseTypeRepository = AppDataSource.getRepository('expense_types');
@@ -78,7 +85,7 @@ async function seed() {
       savedTypes.push(saved);
     }
 
-    console.log('Expense types created');
+    console.log('✅ Expense types created');
 
     // Crear detalles de gastos
     const expenseDetailRepository = AppDataSource.getRepository('expense_details');
@@ -115,10 +122,10 @@ async function seed() {
       await expenseDetailRepository.save(detail);
     }
 
-    console.log('Expense details created');
+    console.log('✅ Expense details created');
 
     console.log('\n========================================');
-    console.log('Seed completed successfully!');
+    console.log('🎉 Seed completed successfully!');
     console.log('========================================');
     console.log('Test user credentials:');
     console.log('Email: admin@gastos.com');
@@ -126,10 +133,18 @@ async function seed() {
     console.log('========================================\n');
 
     await AppDataSource.destroy();
+
+    return {
+      success: true,
+      message: 'Database seeded successfully',
+      credentials: {
+        email: 'admin@gastos.com',
+        password: 'admin123',
+      },
+    };
   } catch (error) {
-    console.error('Error seeding database:', error);
-    process.exit(1);
+    console.error('❌ Error seeding database:', error);
+    await AppDataSource.destroy();
+    throw error;
   }
 }
-
-seed();

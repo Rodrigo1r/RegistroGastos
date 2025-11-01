@@ -9,10 +9,36 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { runSeed } from './database/seed-runner';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  // 🌱 Ejecutar seed si la variable RUN_SEED está configurada
+  const runSeedFlag = configService.get('RUN_SEED');
+  if (runSeedFlag === 'true' || runSeedFlag === '1') {
+    console.log('\n========================================');
+    console.log('🌱 RUN_SEED detected - Running database seed...');
+    console.log('========================================\n');
+
+    try {
+      const result = await runSeed(configService);
+      console.log('\n========================================');
+      console.log('✅ Seed completed successfully!');
+      console.log('========================================');
+      console.log('📋 Result:', JSON.stringify(result, null, 2));
+      console.log('========================================');
+      console.log('⚠️  REMEMBER: Delete RUN_SEED variable from Railway after this deployment');
+      console.log('========================================\n');
+    } catch (error) {
+      console.error('\n========================================');
+      console.error('❌ Seed failed:', error.message);
+      console.error('========================================\n');
+      // No detener la aplicación si el seed falla
+      // (puede ser que ya se haya ejecutado antes)
+    }
+  }
 
   // Enable CORS for Flutter app
   app.enableCors({
