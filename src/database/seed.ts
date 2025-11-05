@@ -49,17 +49,17 @@ async function seed() {
 
     // Crear usuario de prueba por defecto
     const userRepository = AppDataSource.getRepository('users');
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const hashedPassword = await bcrypt.hash('administrador', 10);
 
     await userRepository.save({
-      email: 'admin@gastos.com',
+      email: 'rodrigo1r@hotmail.com',
       password: hashedPassword,
-      firstName: 'Admin',
-      lastName: 'Sistema',
+      firstName: 'Rodrigo',
+      lastName: 'Ordonez',
       isActive: true,
     });
 
-    console.log('Test user created: admin@gastos.com / admin123');
+    console.log('Test user created: rodrigo1r@hotmail.com / admin123');
 
     // Crear tipos de gastos
     const expenseTypeRepository = AppDataSource.getRepository('expense_types');
@@ -117,12 +117,30 @@ async function seed() {
 
     console.log('Expense details created');
 
+    // Crear tipos de ingresos
+    const incomeTypeRepository = AppDataSource.getRepository('income_types');
+
+    const incomeTypes = [
+      { name: 'Sueldo Quincenal', description: 'Pago de sueldo recibido cada quincena', isActive: true },
+      { name: 'Sueldo Mensual', description: 'Pago de sueldo recibido mensualmente', isActive: true },
+      { name: 'Bonificación', description: 'Bonos y bonificaciones extraordinarias', isActive: true },
+      { name: 'Horas Extra', description: 'Pago por horas extraordinarias trabajadas', isActive: true },
+      { name: 'Freelance', description: 'Ingresos por trabajos independientes o freelance', isActive: true },
+      { name: 'Otros', description: 'Otros tipos de ingresos', isActive: true },
+    ];
+
+    for (const type of incomeTypes) {
+      await incomeTypeRepository.save(type);
+    }
+
+    console.log('Income types created');
+
     console.log('\n========================================');
     console.log('Seed completed successfully!');
     console.log('========================================');
     console.log('Test user credentials:');
-    console.log('Email: admin@gastos.com');
-    console.log('Password: admin123');
+    console.log('Email: rodrigo1r@hotmail.com');
+    console.log('Password: administrador');
     console.log('========================================\n');
 
     await AppDataSource.destroy();

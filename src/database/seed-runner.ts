@@ -59,14 +59,14 @@ export async function runSeed(configService: ConfigService) {
     const hashedPassword = await bcrypt.hash('admin123', 10);
 
     await userRepository.save({
-      email: 'admin@gastos.com',
+      email: 'rodrigo1r@hotmail.com',
       password: hashedPassword,
-      firstName: 'Admin',
-      lastName: 'Sistema',
+      firstName: 'Rodrigo',
+      lastName: 'Ordonez',
       isActive: true,
     });
 
-    console.log('✅ Test user created: admin@gastos.com / admin123');
+    console.log('✅ Test user created: rodrigo1r@hotmail.com / admin123');
 
     // Crear tipos de gastos
     const expenseTypeRepository = AppDataSource.getRepository('expense_types');
@@ -128,7 +128,7 @@ export async function runSeed(configService: ConfigService) {
     console.log('🎉 Seed completed successfully!');
     console.log('========================================');
     console.log('Test user credentials:');
-    console.log('Email: admin@gastos.com');
+    console.log('Email: rodrigo1r@hotmail.com');
     console.log('Password: admin123');
     console.log('========================================\n');
 
@@ -138,7 +138,7 @@ export async function runSeed(configService: ConfigService) {
       success: true,
       message: 'Database seeded successfully',
       credentials: {
-        email: 'admin@gastos.com',
+        email: 'rodrigo1r@hotmail.com',
         password: 'admin123',
       },
     };

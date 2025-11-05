@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ExpenseTypesModule } from './expense-types/expense-types.module';
 import { ExpensesModule } from './expenses/expenses.module';
+import { IncomeTypesModule } from './income-types/income-types.module';
+import { IncomesModule } from './incomes/incomes.module';
 
 @Module({
   imports: [
@@ -80,6 +82,8 @@ import { ExpensesModule } from './expenses/expenses.module';
     UsersModule,
     ExpenseTypesModule,
     ExpensesModule,
+    IncomeTypesModule,
+    IncomesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
