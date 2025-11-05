@@ -118,6 +118,9 @@ export class IncomesService {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59);
 
+    console.log(`DEBUG getMonthlySummary: userId=${userId}, year=${year}, month=${month}`);
+    console.log(`DEBUG getMonthlySummary: startDate=${startDate.toISOString()}, endDate=${endDate.toISOString()}`);
+
     const incomes = await this.incomeRepository.find({
       where: {
         createdBy: { id: userId },
@@ -125,6 +128,11 @@ export class IncomesService {
       },
       relations: ['incomeType'],
       order: { incomeDate: 'ASC' },
+    });
+
+    console.log(`DEBUG getMonthlySummary: Found ${incomes.length} incomes`);
+    incomes.forEach(income => {
+      console.log(`DEBUG Income: id=${income.id}, amount=${income.amount}, date=${income.incomeDate}, type=${income.incomeType.name}`);
     });
 
     // Calcular total

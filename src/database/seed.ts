@@ -117,7 +117,7 @@ async function seed() {
 
     console.log('Expense details created');
 
-    // Crear tipos de ingresos
+    // Crear tipos de ingresos (solo si no existen)
     const incomeTypeRepository = AppDataSource.getRepository('income_types');
 
     const incomeTypes = [
@@ -129,11 +129,17 @@ async function seed() {
       { name: 'Otros', description: 'Otros tipos de ingresos', isActive: true },
     ];
 
-    for (const type of incomeTypes) {
-      await incomeTypeRepository.save(type);
-    }
+    // Verificar cuántos tipos ya existen
+    const existingIncomeTypes = await incomeTypeRepository.count();
 
-    console.log('Income types created');
+    if (existingIncomeTypes === 0) {
+      for (const type of incomeTypes) {
+        await incomeTypeRepository.save(type);
+      }
+      console.log('Income types created');
+    } else {
+      console.log(`Income types already exist (${existingIncomeTypes} found), skipping creation`);
+    }
 
     console.log('\n========================================');
     console.log('Seed completed successfully!');
