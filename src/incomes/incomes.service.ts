@@ -118,9 +118,6 @@ export class IncomesService {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59);
 
-    console.log(`DEBUG getMonthlySummary: userId=${userId}, year=${year}, month=${month}`);
-    console.log(`DEBUG getMonthlySummary: startDate=${startDate.toISOString()}, endDate=${endDate.toISOString()}`);
-
     const incomes = await this.incomeRepository.find({
       where: {
         createdBy: { id: userId },
@@ -128,11 +125,6 @@ export class IncomesService {
       },
       relations: ['incomeType'],
       order: { incomeDate: 'ASC' },
-    });
-
-    console.log(`DEBUG getMonthlySummary: Found ${incomes.length} incomes`);
-    incomes.forEach(income => {
-      console.log(`DEBUG Income: id=${income.id}, amount=${income.amount}, date=${income.incomeDate}, type=${income.incomeType.name}`);
     });
 
     // Calcular total
@@ -172,7 +164,11 @@ export class IncomesService {
     >();
 
     incomes.forEach((income) => {
-      const dateKey = income.incomeDate.toISOString().split('T')[0];
+      // Convertir a Date si es string (PostgreSQL devuelve date como string)
+      const date = income.incomeDate instanceof Date
+        ? income.incomeDate
+        : new Date(income.incomeDate);
+      const dateKey = date.toISOString().split('T')[0];
       if (!incomesByDayMap.has(dateKey)) {
         incomesByDayMap.set(dateKey, {
           date: dateKey,
@@ -231,7 +227,11 @@ export class IncomesService {
     }
 
     incomes.forEach((income) => {
-      const month = income.incomeDate.getMonth() + 1;
+      // Convertir a Date si es string (PostgreSQL devuelve date como string)
+      const date = income.incomeDate instanceof Date
+        ? income.incomeDate
+        : new Date(income.incomeDate);
+      const month = date.getMonth() + 1;
       const monthData = incomesByMonthMap.get(month)!;
       monthData.total += Number(income.amount);
       monthData.count += 1;
