@@ -75,7 +75,6 @@ import { DebtPaymentsModule } from './debt-payments/debt-payments.module';
         }
 
         // Determinar si sincronizar: desarrollo O si está forzado por variable
-        const syncDatabase = configService.get('SYNC_DATABASE', 'false') === 'true';
         const shouldSync = nodeEnv === 'development' || syncDatabase;
         console.log('  - Will synchronize schema:', shouldSync);
 
