@@ -37,22 +37,21 @@ export class ExpensesController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los gastos' })
-  findAll() {
-    return this.expensesService.findAll();
+  findAll(@CurrentUser() user: User) {
+    return this.expensesService.findAll(user.id);
   }
 
   @Get('summary')
   @ApiOperation({ summary: 'Obtener resumen de gastos' })
-  @ApiQuery({ name: 'userId', required: false })
   @ApiQuery({ name: 'month', required: false, description: 'Mes (1-12)' })
   @ApiQuery({ name: 'year', required: false, description: 'Año (ej: 2025)' })
   getSummary(
-    @Query('userId') userId?: string,
+    @CurrentUser() user: User,
     @Query('month') month?: string,
     @Query('year') year?: string,
   ) {
     return this.expensesService.getExpensesSummary(
-      userId,
+      user.id,
       month ? parseInt(month) : undefined,
       year ? parseInt(year) : undefined,
     );
@@ -60,44 +59,44 @@ export class ExpensesController {
 
   @Get('pending')
   @ApiOperation({ summary: 'Obtener gastos pendientes' })
-  getPending() {
-    return this.expensesService.getPendingExpenses();
+  getPending(@CurrentUser() user: User) {
+    return this.expensesService.getPendingExpenses(user.id);
   }
 
   @Get('completed')
   @ApiOperation({ summary: 'Obtener gastos completados' })
-  getCompleted() {
-    return this.expensesService.getCompletedExpenses();
+  getCompleted(@CurrentUser() user: User) {
+    return this.expensesService.getCompletedExpenses(user.id);
   }
 
   @Get('partial')
   @ApiOperation({ summary: 'Obtener gastos con pagos parciales' })
-  getPartial() {
-    return this.expensesService.getPartialExpenses();
+  getPartial(@CurrentUser() user: User) {
+    return this.expensesService.getPartialExpenses(user.id);
   }
 
   @Get('status/:status')
   @ApiOperation({ summary: 'Obtener gastos por status' })
-  getByStatus(@Param('status') status: PaymentStatus) {
-    return this.expensesService.getExpensesByStatus(status);
+  getByStatus(@Param('status') status: PaymentStatus, @CurrentUser() user: User) {
+    return this.expensesService.getExpensesByStatus(status, user.id);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un gasto por ID' })
-  findOne(@Param('id') id: string) {
-    return this.expensesService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.expensesService.findOne(id, user.id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar gasto' })
-  update(@Param('id') id: string, @Body() updateExpenseDto: UpdateExpenseDto) {
-    return this.expensesService.update(id, updateExpenseDto);
+  update(@Param('id') id: string, @Body() updateExpenseDto: UpdateExpenseDto, @CurrentUser() user: User) {
+    return this.expensesService.update(id, updateExpenseDto, user.id);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar gasto' })
-  remove(@Param('id') id: string) {
-    return this.expensesService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.expensesService.remove(id, user.id);
   }
 
   // Endpoints para pagos
@@ -112,13 +111,13 @@ export class ExpensesController {
 
   @Get('payments/all')
   @ApiOperation({ summary: 'Obtener todos los pagos' })
-  findAllPayments() {
-    return this.expensesService.findAllPayments();
+  findAllPayments(@CurrentUser() user: User) {
+    return this.expensesService.findAllPayments(user.id);
   }
 
   @Get(':expenseId/payments')
   @ApiOperation({ summary: 'Obtener pagos de un gasto específico' })
-  findPaymentsByExpense(@Param('expenseId') expenseId: string) {
-    return this.expensesService.findPaymentsByExpense(expenseId);
+  findPaymentsByExpense(@Param('expenseId') expenseId: string, @CurrentUser() user: User) {
+    return this.expensesService.findPaymentsByExpense(expenseId, user.id);
   }
 }

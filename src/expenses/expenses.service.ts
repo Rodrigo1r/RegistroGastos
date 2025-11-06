@@ -57,8 +57,9 @@ export class ExpensesService {
     return this.expenseRepository.save(expense);
   }
 
-  async findAll() {
+  async findAll(userId: string) {
     const expenses = await this.expenseRepository.find({
+      where: { createdBy: { id: userId } },
       relations: ['createdBy', 'expenseDetail', 'expenseDetail.expenseType'],
       order: { createdAt: 'DESC' },
     });
@@ -75,9 +76,9 @@ export class ExpensesService {
     return expenses;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId: string) {
     const expense = await this.expenseRepository.findOne({
-      where: { id },
+      where: { id, createdBy: { id: userId } },
       relations: [
         'createdBy',
         'expenseDetail',
@@ -101,9 +102,9 @@ export class ExpensesService {
     return expense;
   }
 
-  async update(id: string, updateExpenseDto: UpdateExpenseDto) {
+  async update(id: string, updateExpenseDto: UpdateExpenseDto, userId: string) {
     const expense = await this.expenseRepository.findOne({
-      where: { id },
+      where: { id, createdBy: { id: userId } },
       relations: ['expenseDetail'],
     });
 
@@ -143,8 +144,10 @@ export class ExpensesService {
     return this.expenseRepository.save(expense);
   }
 
-  async remove(id: string) {
-    const expense = await this.expenseRepository.findOne({ where: { id } });
+  async remove(id: string, userId: string) {
+    const expense = await this.expenseRepository.findOne({
+      where: { id, createdBy: { id: userId } }
+    });
 
     if (!expense) {
       throw new NotFoundException('Gasto no encontrado');
@@ -162,7 +165,7 @@ export class ExpensesService {
     }
 
     const expense = await this.expenseRepository.findOne({
-      where: { id: createPaymentDto.expenseId },
+      where: { id: createPaymentDto.expenseId, createdBy: { id: userId } },
       relations: ['payments'],
     });
 
@@ -203,16 +206,17 @@ export class ExpensesService {
     return payment;
   }
 
-  async findAllPayments() {
+  async findAllPayments(userId: string) {
     return this.paymentRepository.find({
+      where: { registeredBy: { id: userId } },
       relations: ['expense', 'expense.expenseDetail', 'registeredBy'],
       order: { createdAt: 'DESC' },
     });
   }
 
-  async findPaymentsByExpense(expenseId: string) {
+  async findPaymentsByExpense(expenseId: string, userId: string) {
     const expense = await this.expenseRepository.findOne({
-      where: { id: expenseId },
+      where: { id: expenseId, createdBy: { id: userId } },
     });
 
     if (!expense) {
@@ -227,9 +231,9 @@ export class ExpensesService {
   }
 
   // Métodos para reportes
-  async getExpensesByStatus(status: PaymentStatus) {
+  async getExpensesByStatus(status: PaymentStatus, userId: string) {
     const expenses = await this.expenseRepository.find({
-      where: { status },
+      where: { status, createdBy: { id: userId } },
       relations: ['createdBy', 'expenseDetail', 'expenseDetail.expenseType'],
       order: { dueDate: 'ASC' },
     });
@@ -237,8 +241,9 @@ export class ExpensesService {
     return expenses;
   }
 
-  async getPendingExpenses() {
+  async getPendingExpenses(userId: string) {
     const expenses = await this.expenseRepository.find({
+      where: { createdBy: { id: userId } },
       relations: ['createdBy', 'expenseDetail', 'expenseDetail.expenseType'],
       order: { dueDate: 'ASC' },
     });
@@ -249,12 +254,12 @@ export class ExpensesService {
     );
   }
 
-  async getCompletedExpenses() {
-    return this.getExpensesByStatus(PaymentStatus.COMPLETED);
+  async getCompletedExpenses(userId: string) {
+    return this.getExpensesByStatus(PaymentStatus.COMPLETED, userId);
   }
 
-  async getPartialExpenses() {
-    return this.getExpensesByStatus(PaymentStatus.PARTIAL);
+  async getPartialExpenses(userId: string) {
+    return this.getExpensesByStatus(PaymentStatus.PARTIAL, userId);
   }
 
   async getExpensesSummary(userId?: string, month?: number, year?: number) {

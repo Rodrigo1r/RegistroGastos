@@ -23,10 +23,11 @@ export class DebtPaymentsService {
 
   async create(
     createDebtPaymentDto: CreateDebtPaymentDto,
+    userId: string,
   ): Promise<DebtPayment> {
-    // Verificar que la deuda existe
+    // Verificar que la deuda existe y pertenece al usuario
     const debt = await this.debtRepository.findOne({
-      where: { id: createDebtPaymentDto.debtId },
+      where: { id: createDebtPaymentDto.debtId, createdBy: { id: userId } },
     });
 
     if (!debt) {
@@ -64,28 +65,44 @@ export class DebtPaymentsService {
     return savedPayment;
   }
 
-  async findByDebt(debtId: string): Promise<DebtPayment[]> {
+  async findByDebt(debtId: string, userId: string): Promise<DebtPayment[]> {
+    // Primero verificar que la deuda pertenece al usuario
+    const debt = await this.debtRepository.findOne({
+      where: { id: debtId, createdBy: { id: userId } },
+    });
+
+    if (!debt) {
+      throw new NotFoundException(
+        `Deuda con ID "${debtId}" no encontrada`,
+      );
+    }
+
     return await this.paymentRepository.find({
       where: { debt: { id: debtId } },
       order: { paymentDate: 'DESC', createdAt: 'DESC' },
     });
   }
 
-  async findOne(id: string): Promise<DebtPayment> {
+  async findOne(id: string, userId: string): Promise<DebtPayment> {
     const payment = await this.paymentRepository.findOne({
       where: { id },
-      relations: ['debt', 'debt.debtor'],
+      relations: ['debt', 'debt.debtor', 'debt.createdBy'],
     });
 
     if (!payment) {
       throw new NotFoundException(`Pago con ID "${id}" no encontrado`);
     }
 
+    // Verificar que la deuda asociada pertenece al usuario
+    if (payment.debt.createdBy.id !== userId) {
+      throw new NotFoundException(`Pago con ID "${id}" no encontrado`);
+    }
+
     return payment;
   }
 
-  async remove(id: string): Promise<void> {
-    const payment = await this.findOne(id);
+  async remove(id: string, userId: string): Promise<void> {
+    const payment = await this.findOne(id, userId);
     const debtId = payment.debt.id;
 
     await this.paymentRepository.remove(payment);
@@ -124,7 +141,7 @@ export class DebtPaymentsService {
     // Get all payments for all debts
     const allPayments: DebtPayment[] = [];
     for (const debt of debts) {
-      const payments = await this.findByDebt(debt.id);
+      const payments = await this.findByDebt(debt.id, userId);
       allPayments.push(...payments);
     }
 
