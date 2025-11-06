@@ -25,19 +25,25 @@ import { DebtPaymentsModule } from './debt-payments/debt-payments.module';
       useFactory: (configService: ConfigService) => {
         const databaseUrl = configService.get('DATABASE_URL');
         const nodeEnv = configService.get('NODE_ENV', 'development');
+        const syncDatabase = configService.get('SYNC_DATABASE', 'false') === 'true';
 
         console.log('🔍 Database Configuration Debug:');
         console.log('  - NODE_ENV:', nodeEnv);
         console.log('  - DATABASE_URL exists:', !!databaseUrl);
+        console.log('  - SYNC_DATABASE:', syncDatabase);
 
         if (databaseUrl) {
           // Railway o Heroku proporcionan DATABASE_URL
           console.log('✅ Using DATABASE_URL for database connection');
+          // Determinar si sincronizar: desarrollo O si está forzado por variable
+          const shouldSync = nodeEnv === 'development' || syncDatabase;
+          console.log('  - Will synchronize schema:', shouldSync);
+
           return {
             type: 'postgres',
             url: databaseUrl,
             entities: [__dirname + '/**/*.entity{.ts,.js}'],
-            synchronize: nodeEnv === 'development', // Solo en desarrollo
+            synchronize: shouldSync,
             logging: nodeEnv === 'development',
             ssl: {
               rejectUnauthorized: false, // Requerido para servicios cloud
@@ -68,6 +74,11 @@ import { DebtPaymentsModule } from './debt-payments/debt-payments.module';
           );
         }
 
+        // Determinar si sincronizar: desarrollo O si está forzado por variable
+        const syncDatabase = configService.get('SYNC_DATABASE', 'false') === 'true';
+        const shouldSync = nodeEnv === 'development' || syncDatabase;
+        console.log('  - Will synchronize schema:', shouldSync);
+
         return {
           type: 'postgres',
           host: dbHost || 'localhost',
@@ -76,7 +87,7 @@ import { DebtPaymentsModule } from './debt-payments/debt-payments.module';
           password: dbPassword || '',
           database: dbDatabase || 'gastos_control',
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          synchronize: nodeEnv === 'development',
+          synchronize: shouldSync,
           logging: nodeEnv === 'development',
         };
       },
