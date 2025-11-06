@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
   ParseUUIDPipe,
   Query,
   ParseIntPipe,
@@ -23,6 +22,8 @@ import { IncomesService } from './incomes.service';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { User } from '../users/entities/user.entity';
 
 @ApiTags('Ingresos')
 @ApiBearerAuth()
@@ -35,15 +36,15 @@ export class IncomesController {
   @ApiOperation({ summary: 'Registrar un nuevo ingreso' })
   @ApiResponse({ status: 201, description: 'Ingreso registrado exitosamente' })
   @ApiResponse({ status: 404, description: 'Tipo de ingreso no encontrado' })
-  create(@Body() createIncomeDto: CreateIncomeDto, @Request() req) {
-    return this.incomesService.create(createIncomeDto, req.user);
+  create(@Body() createIncomeDto: CreateIncomeDto, @CurrentUser() user: User) {
+    return this.incomesService.create(createIncomeDto, user);
   }
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los ingresos del usuario' })
   @ApiResponse({ status: 200, description: 'Lista de ingresos obtenida' })
-  findAll(@Request() req) {
-    return this.incomesService.findAll(req.user.id);
+  findAll(@CurrentUser() user: User) {
+    return this.incomesService.findAll(user.id);
   }
 
   @Get('summary/monthly')
@@ -52,11 +53,11 @@ export class IncomesController {
   @ApiQuery({ name: 'month', required: true, type: Number })
   @ApiResponse({ status: 200, description: 'Resumen mensual obtenido' })
   getMonthlySummary(
-    @Request() req,
+    @CurrentUser() user: User,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
   ) {
-    return this.incomesService.getMonthlySummary(req.user.id, year, month);
+    return this.incomesService.getMonthlySummary(user.id, year, month);
   }
 
   @Get('summary/yearly')
@@ -64,18 +65,18 @@ export class IncomesController {
   @ApiQuery({ name: 'year', required: true, type: Number })
   @ApiResponse({ status: 200, description: 'Resumen anual obtenido' })
   getYearlySummary(
-    @Request() req,
+    @CurrentUser() user: User,
     @Query('year', ParseIntPipe) year: number,
   ) {
-    return this.incomesService.getYearlySummary(req.user.id, year);
+    return this.incomesService.getYearlySummary(user.id, year);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un ingreso por ID' })
   @ApiResponse({ status: 200, description: 'Ingreso encontrado' })
   @ApiResponse({ status: 404, description: 'Ingreso no encontrado' })
-  findOne(@Param('id', ParseUUIDPipe) id: string, @Request() req) {
-    return this.incomesService.findOne(id, req.user.id);
+  findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
+    return this.incomesService.findOne(id, user.id);
   }
 
   @Patch(':id')
@@ -85,16 +86,16 @@ export class IncomesController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateIncomeDto: UpdateIncomeDto,
-    @Request() req,
+    @CurrentUser() user: User,
   ) {
-    return this.incomesService.update(id, updateIncomeDto, req.user.id);
+    return this.incomesService.update(id, updateIncomeDto, user.id);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar un ingreso' })
   @ApiResponse({ status: 200, description: 'Ingreso eliminado exitosamente' })
   @ApiResponse({ status: 404, description: 'Ingreso no encontrado' })
-  remove(@Param('id', ParseUUIDPipe) id: string, @Request() req) {
-    return this.incomesService.remove(id, req.user.id);
+  remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
+    return this.incomesService.remove(id, user.id);
   }
 }
