@@ -7,10 +7,11 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
   Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { User } from '../users/entities/user.entity';
 import { DebtsService } from './debts.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { UpdateDebtDto } from './dto/update-debt.dto';
@@ -21,34 +22,34 @@ export class DebtsController {
   constructor(private readonly debtsService: DebtsService) {}
 
   @Post()
-  create(@Body() createDebtDto: CreateDebtDto, @Request() req) {
-    return this.debtsService.create(createDebtDto, req.user);
+  create(@Body() createDebtDto: CreateDebtDto, @CurrentUser() user: User) {
+    return this.debtsService.create(createDebtDto, user);
   }
 
   @Get()
-  findAll(@Request() req, @Query('debtorId') debtorId?: string) {
+  findAll(@CurrentUser() user: User, @Query('debtorId') debtorId?: string) {
     if (debtorId) {
-      return this.debtsService.findByDebtor(debtorId, req.user.sub);
+      return this.debtsService.findByDebtor(debtorId, user.id);
     }
-    return this.debtsService.findAll(req.user.sub);
+    return this.debtsService.findAll(user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Request() req) {
-    return this.debtsService.findOne(id, req.user.sub);
+  findOne(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.debtsService.findOne(id, user.id);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateDebtDto: UpdateDebtDto,
-    @Request() req,
+    @CurrentUser() user: User,
   ) {
-    return this.debtsService.update(id, updateDebtDto, req.user.sub);
+    return this.debtsService.update(id, updateDebtDto, user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Request() req) {
-    return this.debtsService.remove(id, req.user.sub);
+  remove(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.debtsService.remove(id, user.id);
   }
 }
