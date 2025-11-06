@@ -9,6 +9,9 @@ import { ExpenseTypesModule } from './expense-types/expense-types.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { IncomeTypesModule } from './income-types/income-types.module';
 import { IncomesModule } from './incomes/incomes.module';
+import { DebtorsModule } from './debtors/debtors.module';
+import { DebtsModule } from './debts/debts.module';
+import { DebtPaymentsModule } from './debt-payments/debt-payments.module';
 
 @Module({
   imports: [
@@ -84,6 +87,9 @@ import { IncomesModule } from './incomes/incomes.module';
     ExpensesModule,
     IncomeTypesModule,
     IncomesModule,
+    DebtorsModule,
+    DebtsModule,
+    DebtPaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
