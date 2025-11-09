@@ -19,6 +19,8 @@ import { IncomeTypesService } from './income-types.service';
 import { CreateIncomeTypeDto } from './dto/create-income-type.dto';
 import { UpdateIncomeTypeDto } from './dto/update-income-type.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { User } from '../users/entities/user.entity';
 
 @ApiTags('Tipos de Ingreso')
 @ApiBearerAuth()
@@ -34,8 +36,8 @@ export class IncomeTypesController {
     description: 'Tipo de ingreso creado exitosamente',
   })
   @ApiResponse({ status: 409, description: 'El tipo de ingreso ya existe' })
-  create(@Body() createIncomeTypeDto: CreateIncomeTypeDto) {
-    return this.incomeTypesService.create(createIncomeTypeDto);
+  create(@Body() createIncomeTypeDto: CreateIncomeTypeDto, @CurrentUser() user: User) {
+    return this.incomeTypesService.create(createIncomeTypeDto, user.id);
   }
 
   @Get()
@@ -44,8 +46,8 @@ export class IncomeTypesController {
     status: 200,
     description: 'Lista de tipos de ingreso obtenida',
   })
-  findAll() {
-    return this.incomeTypesService.findAll();
+  findAll(@CurrentUser() user: User) {
+    return this.incomeTypesService.findAll(user.id);
   }
 
   @Get('active')
@@ -54,16 +56,16 @@ export class IncomeTypesController {
     status: 200,
     description: 'Lista de tipos de ingreso activos',
   })
-  findActive() {
-    return this.incomeTypesService.findActive();
+  findActive(@CurrentUser() user: User) {
+    return this.incomeTypesService.findActive(user.id);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un tipo de ingreso por ID' })
   @ApiResponse({ status: 200, description: 'Tipo de ingreso encontrado' })
   @ApiResponse({ status: 404, description: 'Tipo de ingreso no encontrado' })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.incomeTypesService.findOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
+    return this.incomeTypesService.findOne(id, user.id);
   }
 
   @Patch(':id')
@@ -77,8 +79,9 @@ export class IncomeTypesController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateIncomeTypeDto: UpdateIncomeTypeDto,
+    @CurrentUser() user: User,
   ) {
-    return this.incomeTypesService.update(id, updateIncomeTypeDto);
+    return this.incomeTypesService.update(id, updateIncomeTypeDto, user.id);
   }
 
   @Patch(':id/toggle-active')
@@ -88,8 +91,8 @@ export class IncomeTypesController {
     description: 'Estado del tipo de ingreso cambiado',
   })
   @ApiResponse({ status: 404, description: 'Tipo de ingreso no encontrado' })
-  toggleActive(@Param('id', ParseUUIDPipe) id: string) {
-    return this.incomeTypesService.toggleActive(id);
+  toggleActive(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
+    return this.incomeTypesService.toggleActive(id, user.id);
   }
 
   @Delete(':id')
@@ -99,7 +102,7 @@ export class IncomeTypesController {
     description: 'Tipo de ingreso eliminado exitosamente',
   })
   @ApiResponse({ status: 404, description: 'Tipo de ingreso no encontrado' })
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.incomeTypesService.remove(id);
+  remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
+    return this.incomeTypesService.remove(id, user.id);
   }
 }

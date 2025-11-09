@@ -63,7 +63,7 @@ export class ExpensesService {
     const expenses = await this.expenseRepository.find({
       where: { createdBy: { id: userId } },
       relations: ['createdBy', 'expenseDetail', 'expenseDetail.expenseType'],
-      order: { createdAt: 'DESC' },
+      order: { expenseDate: 'DESC' },
     });
 
     // Actualizar status de todos los gastos
@@ -283,18 +283,18 @@ export class ExpensesService {
       queryBuilder.where('expense.createdBy.id = :userId', { userId });
     }
 
-    // Filtrar por mes y año si se proporcionan
+    // Filtrar por mes y año si se proporcionan (basado en la fecha del gasto)
     if (month && year) {
       const startDate = new Date(year, month - 1, 1); // Primer día del mes
       const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Último día del mes
 
       if (userId) {
-        queryBuilder.andWhere('expense.dueDate BETWEEN :startDate AND :endDate', {
+        queryBuilder.andWhere('expense.expenseDate BETWEEN :startDate AND :endDate', {
           startDate,
           endDate,
         });
       } else {
-        queryBuilder.where('expense.dueDate BETWEEN :startDate AND :endDate', {
+        queryBuilder.where('expense.expenseDate BETWEEN :startDate AND :endDate', {
           startDate,
           endDate,
         });
