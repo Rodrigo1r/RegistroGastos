@@ -18,6 +18,11 @@ export class CreateExpenseDto {
   @IsNotEmpty()
   amount: number;
 
+  @ApiProperty({ example: '2025-11-08' })
+  @IsDateString()
+  @IsNotEmpty()
+  expenseDate: string;
+
   @ApiProperty({ example: '2025-11-15' })
   @IsDateString()
   @IsNotEmpty()
@@ -32,4 +37,9 @@ export class CreateExpenseDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @ApiProperty({ example: 'https://storage.example.com/receipts/file.pdf', required: false })
+  @IsString()
+  @IsOptional()
+  attachmentUrl?: string;
 }

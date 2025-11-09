@@ -45,7 +45,9 @@ export class ExpensesService {
       amount: createExpenseDto.amount,
       paidAmount: 0,
       pendingAmount: createExpenseDto.amount,
+      expenseDate: new Date(createExpenseDto.expenseDate),
       dueDate: new Date(createExpenseDto.dueDate),
+      attachmentUrl: createExpenseDto.attachmentUrl,
       notes: createExpenseDto.notes,
       createdBy: user,
       expenseDetail,
@@ -130,8 +132,16 @@ export class ExpensesService {
       expense.pendingAmount = Number(expense.amount) - Number(expense.paidAmount);
     }
 
+    if (updateExpenseDto.expenseDate) {
+      expense.expenseDate = new Date(updateExpenseDto.expenseDate);
+    }
+
     if (updateExpenseDto.dueDate) {
       expense.dueDate = new Date(updateExpenseDto.dueDate);
+    }
+
+    if (updateExpenseDto.attachmentUrl !== undefined) {
+      expense.attachmentUrl = updateExpenseDto.attachmentUrl;
     }
 
     if (updateExpenseDto.notes !== undefined) {

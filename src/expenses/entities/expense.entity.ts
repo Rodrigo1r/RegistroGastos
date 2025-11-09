@@ -28,7 +28,13 @@ export class Expense {
   pendingAmount: number; // Monto pendiente
 
   @Column({ type: 'date' })
+  expenseDate: Date; // Fecha en que se realizó el gasto
+
+  @Column({ type: 'date' })
   dueDate: Date; // Fecha máxima de pago
+
+  @Column({ nullable: true })
+  attachmentUrl: string; // URL del archivo adjunto (comprobante)
 
   @Column({
     type: 'enum',

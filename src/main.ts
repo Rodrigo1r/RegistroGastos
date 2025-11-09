@@ -57,8 +57,8 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('Sistema de Control de Gastos')
-    .setDescription('API para gestión de gastos personales')
+    .setTitle('Sistema de Gestión de Finanzas')
+    .setDescription('API para gestión de finanzas personales')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

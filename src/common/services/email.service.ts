@@ -41,7 +41,7 @@ export class EmailService {
       await resend.emails.send({
         from: 'noreply@tudominio.com',
         to: email,
-        subject: 'Recuperación de Contraseña - Control de Gastos',
+        subject: 'Recuperación de Contraseña - Gestión de Finanzas',
         html: `
           <h2>Recuperación de Contraseña</h2>
           <p>Has solicitado recuperar tu contraseña.</p>

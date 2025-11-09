@@ -62,14 +62,27 @@ export class AuthService {
       throw new UnauthorizedException('Usuario inactivo');
     }
 
+    // Verificar si la licencia está activa
+    const isLicenseActive = user.isLicenseActive();
+    if (!isLicenseActive) {
+      throw new UnauthorizedException(
+        'Tu período de prueba ha expirado. Por favor, adquiere una licencia para continuar.',
+      );
+    }
+
     const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
 
     const { password, ...userWithoutPassword } = user;
 
+    // Agregar información de licencia a la respuesta
     return {
       access_token: token,
-      user: userWithoutPassword,
+      user: {
+        ...userWithoutPassword,
+        isLicenseActive,
+        remainingDays: user.getRemainingDays(),
+      },
     };
   }
 
