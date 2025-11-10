@@ -55,31 +55,35 @@ export class User {
 
   // Método para verificar si la licencia está activa
   isLicenseActive(): boolean {
+    // Si hay fecha de fin definida, validar que no haya expirado
+    if (this.licenseEndDate) {
+      const now = new Date();
+      const endDate = new Date(this.licenseEndDate);
+      return now <= endDate;
+    }
+
+    // Si no hay fecha de fin, solo las licencias full y premium están activas
     if (this.licenseType === 'full' || this.licenseType === 'premium') {
       return true;
     }
 
-    if (this.licenseType === 'demo') {
-      if (!this.licenseEndDate) {
-        return false;
-      }
-      const now = new Date();
-      return now <= new Date(this.licenseEndDate);
-    }
-
+    // Para otros tipos sin fecha de fin (como demo), no está activa
     return false;
   }
 
   // Método para obtener días restantes de licencia
   getRemainingDays(): number | null {
-    if (this.licenseType === 'full' || this.licenseType === 'premium') {
-      return null; // Ilimitado (no aplica)
-    }
-
+    // Si no hay fecha de fin definida, la licencia es ilimitada
     if (!this.licenseEndDate) {
+      // Para licencias full/premium sin fecha de fin, retornar null (ilimitado)
+      if (this.licenseType === 'full' || this.licenseType === 'premium') {
+        return null;
+      }
+      // Para otros tipos sin fecha de fin, considerar expirado
       return 0;
     }
 
+    // Si hay fecha de fin definida, calcular días restantes
     const now = new Date();
     const endDate = new Date(this.licenseEndDate);
     const diffTime = endDate.getTime() - now.getTime();

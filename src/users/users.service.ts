@@ -38,11 +38,14 @@ export class UsersService {
 
   async findAll() {
     const users = await this.userRepository.find();
-    return users.map(({ password, ...user }) => ({
-      ...user,
-      isLicenseActive: user.isLicenseActive(),
-      remainingDays: user.getRemainingDays(),
-    }));
+    return users.map((user) => {
+      const { password, ...result } = user;
+      return {
+        ...result,
+        isLicenseActive: user.isLicenseActive(),
+        remainingDays: user.getRemainingDays(),
+      };
+    });
   }
 
   async findOne(id: string) {
