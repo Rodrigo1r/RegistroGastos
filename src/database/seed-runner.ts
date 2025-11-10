@@ -42,11 +42,11 @@ export async function runSeed(configService: ConfigService) {
     console.log('✅ Connected to database');
 
     // Verificar si ya existen datos
-    const userRepository = AppDataSource.getRepository('users');
-    const existingUsers = await userRepository.count();
+    const expenseTypeRepository = AppDataSource.getRepository('expense_types');
+    const existingExpenseTypes = await expenseTypeRepository.count();
 
-    if (existingUsers > 0) {
-      console.log('⚠️  Database already has data. Skipping seed.');
+    if (existingExpenseTypes > 0) {
+      console.log('⚠️  Database already has expense types. Skipping seed.');
       await AppDataSource.destroy();
       return {
         success: true,
@@ -55,28 +55,25 @@ export async function runSeed(configService: ConfigService) {
       };
     }
 
-    // Crear usuario de prueba por defecto
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    console.log('📝 Creating system types and details...\n');
 
-    await userRepository.save({
-      email: 'rodrigo1r@hotmail.com',
-      password: hashedPassword,
-      firstName: 'Rodrigo',
-      lastName: 'Ordonez',
-      isActive: true,
-    });
-
-    console.log('✅ Test user created: rodrigo1r@hotmail.com / admin123');
-
-    // Crear tipos de gastos
-    const expenseTypeRepository = AppDataSource.getRepository('expense_types');
-
+    // ===================================================================
+    // TIPOS DE GASTOS DEL SISTEMA
+    // ===================================================================
     const expenseTypes = [
-      { name: 'Educación', description: 'Gastos relacionados con educación', isActive: true },
-      { name: 'Salud', description: 'Gastos relacionados con salud', isActive: true },
-      { name: 'Vivienda', description: 'Gastos relacionados con vivienda', isActive: true },
-      { name: 'Vestimenta', description: 'Gastos relacionados con vestimenta', isActive: true },
-      { name: 'Alimentación', description: 'Gastos relacionados con alimentación', isActive: true },
+      { name: 'Educación', description: 'Gastos relacionados con educación, cursos, libros, etc.', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Salud', description: 'Gastos médicos, medicinas, seguros de salud, etc.', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Vivienda', description: 'Alquiler, hipoteca, servicios básicos, mantenimiento', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Alimentación', description: 'Supermercado, restaurantes, comida', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Transporte', description: 'Gasolina, transporte público, mantenimiento de vehículo', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Vestimenta', description: 'Ropa, calzado, accesorios', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Entretenimiento', description: 'Ocio, hobbies, suscripciones, salidas', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Servicios', description: 'Internet, teléfono, streaming, otros servicios', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Seguros', description: 'Seguros de vida, auto, hogar, etc.', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Impuestos', description: 'Impuestos y obligaciones fiscales', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Ahorro e Inversión', description: 'Ahorros, inversiones, fondos', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Mascotas', description: 'Comida, veterinario, accesorios para mascotas', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Otros', description: 'Gastos varios no categorizados', isActive: true, isSystem: true, created_by_id: null },
     ];
 
     const savedTypes: any[] = [];
@@ -85,51 +82,131 @@ export async function runSeed(configService: ConfigService) {
       savedTypes.push(saved);
     }
 
-    console.log('✅ Expense types created');
+    console.log('✅ Created', savedTypes.length, 'expense types');
 
-    // Crear detalles de gastos
+    // ===================================================================
+    // DETALLES DE GASTOS DEL SISTEMA
+    // ===================================================================
     const expenseDetailRepository = AppDataSource.getRepository('expense_details');
 
-    const expenseDetails = [
-      // Educación
-      { name: 'Pago Pensión Escuela', description: 'Mensualidad escolar', expense_type_id: savedTypes[0].id, isActive: true },
-      { name: 'Pago Pensión Colegio', description: 'Mensualidad colegio', expense_type_id: savedTypes[0].id, isActive: true },
-      { name: 'Pago Universidad', description: 'Mensualidad universidad', expense_type_id: savedTypes[0].id, isActive: true },
-      { name: 'Material Escolar', description: 'Útiles y materiales', expense_type_id: savedTypes[0].id, isActive: true },
-
-      // Salud
-      { name: 'Seguro Médico', description: 'Prima de seguro', expense_type_id: savedTypes[1].id, isActive: true },
-      { name: 'Consulta Médica', description: 'Consultas y revisiones', expense_type_id: savedTypes[1].id, isActive: true },
-      { name: 'Medicamentos', description: 'Compra de medicinas', expense_type_id: savedTypes[1].id, isActive: true },
-
-      // Vivienda
-      { name: 'Pago Agua', description: 'Servicio de agua', expense_type_id: savedTypes[2].id, isActive: true },
-      { name: 'Pago Luz', description: 'Servicio eléctrico', expense_type_id: savedTypes[2].id, isActive: true },
-      { name: 'Pago Teléfono', description: 'Servicio telefónico', expense_type_id: savedTypes[2].id, isActive: true },
-      { name: 'Pago Internet', description: 'Servicio de internet', expense_type_id: savedTypes[2].id, isActive: true },
-      { name: 'Alquiler', description: 'Renta mensual', expense_type_id: savedTypes[2].id, isActive: true },
-
-      // Vestimenta
-      { name: 'Ropa', description: 'Compra de ropa', expense_type_id: savedTypes[3].id, isActive: true },
-      { name: 'Calzado', description: 'Compra de zapatos', expense_type_id: savedTypes[3].id, isActive: true },
-
-      // Alimentación
-      { name: 'Supermercado', description: 'Compras del mes', expense_type_id: savedTypes[4].id, isActive: true },
-      { name: 'Restaurante', description: 'Comidas fuera de casa', expense_type_id: savedTypes[4].id, isActive: true },
+    const expenseDetailsData = [
+      // Educación - savedTypes[0]
+      { typeIndex: 0, details: [
+        { name: 'Matrícula escolar', description: 'Pago de matrícula' },
+        { name: 'Pensión escolar', description: 'Pago mensual de pensión' },
+        { name: 'Útiles escolares', description: 'Cuadernos, lápices, material escolar' },
+        { name: 'Uniformes', description: 'Uniformes escolares' },
+        { name: 'Cursos y capacitaciones', description: 'Cursos, talleres, seminarios' },
+        { name: 'Libros y material de estudio', description: 'Libros, manuales, material educativo' },
+      ]},
+      // Salud - savedTypes[1]
+      { typeIndex: 1, details: [
+        { name: 'Consulta médica', description: 'Consultas con médicos' },
+        { name: 'Medicinas', description: 'Compra de medicamentos' },
+        { name: 'Exámenes y análisis', description: 'Exámenes de laboratorio' },
+        { name: 'Hospitalización', description: 'Gastos de hospital' },
+        { name: 'Seguro médico', description: 'Pago de seguro de salud' },
+        { name: 'Odontología', description: 'Dentista y tratamientos dentales' },
+        { name: 'Óptica', description: 'Lentes, examen de vista' },
+        { name: 'Terapias', description: 'Fisioterapia, psicología, etc.' },
+      ]},
+      // Vivienda - savedTypes[2]
+      { typeIndex: 2, details: [
+        { name: 'Alquiler', description: 'Pago mensual de alquiler' },
+        { name: 'Hipoteca', description: 'Pago de crédito hipotecario' },
+        { name: 'Agua', description: 'Servicio de agua' },
+        { name: 'Luz', description: 'Servicio de electricidad' },
+        { name: 'Gas', description: 'Servicio de gas' },
+        { name: 'Mantenimiento', description: 'Reparaciones y mantenimiento del hogar' },
+        { name: 'Impuesto predial', description: 'Impuestos de la propiedad' },
+        { name: 'Condominio', description: 'Cuota de mantenimiento de condominio' },
+      ]},
+      // Alimentación - savedTypes[3]
+      { typeIndex: 3, details: [
+        { name: 'Supermercado', description: 'Compras de supermercado' },
+        { name: 'Restaurantes', description: 'Comidas fuera de casa' },
+        { name: 'Delivery', description: 'Pedidos a domicilio' },
+        { name: 'Cafetería', description: 'Café, snacks' },
+        { name: 'Despensa', description: 'Alimentos no perecederos' },
+      ]},
+      // Transporte - savedTypes[4]
+      { typeIndex: 4, details: [
+        { name: 'Gasolina', description: 'Combustible para vehículo' },
+        { name: 'Transporte público', description: 'Bus, metro, taxi' },
+        { name: 'Uber/Taxi', description: 'Servicios de transporte privado' },
+        { name: 'Mantenimiento vehículo', description: 'Reparaciones y mantenimiento' },
+        { name: 'Estacionamiento', description: 'Pago de parqueo' },
+        { name: 'Peaje', description: 'Pago de peajes' },
+        { name: 'Seguro de auto', description: 'Seguro del vehículo' },
+      ]},
+      // Entretenimiento - savedTypes[6]
+      { typeIndex: 6, details: [
+        { name: 'Cine', description: 'Entradas de cine' },
+        { name: 'Conciertos y eventos', description: 'Eventos culturales y musicales' },
+        { name: 'Gimnasio', description: 'Membresía de gimnasio' },
+        { name: 'Deportes', description: 'Actividades deportivas' },
+        { name: 'Hobbies', description: 'Gastos en pasatiempos' },
+        { name: 'Viajes y turismo', description: 'Vacaciones y viajes' },
+      ]},
+      // Servicios - savedTypes[7]
+      { typeIndex: 7, details: [
+        { name: 'Internet', description: 'Servicio de internet' },
+        { name: 'Teléfono móvil', description: 'Plan de celular' },
+        { name: 'TV Cable/Streaming', description: 'Netflix, cable, etc.' },
+        { name: 'Spotify/Música', description: 'Servicios de música' },
+        { name: 'Suscripciones', description: 'Otras suscripciones' },
+      ]},
     ];
 
-    for (const detail of expenseDetails) {
-      await expenseDetailRepository.save(detail);
+    let detailCount = 0;
+    for (const group of expenseDetailsData) {
+      for (const detail of group.details) {
+        await expenseDetailRepository.save({
+          name: detail.name,
+          description: detail.description,
+          isActive: true,
+          isSystem: true,
+          expense_type_id: savedTypes[group.typeIndex].id,
+          created_by_id: null,
+        });
+        detailCount++;
+      }
     }
 
-    console.log('✅ Expense details created');
+    console.log('✅ Created', detailCount, 'expense details');
+
+    // ===================================================================
+    // TIPOS DE INGRESOS DEL SISTEMA
+    // ===================================================================
+    const incomeTypeRepository = AppDataSource.getRepository('income_types');
+
+    const incomeTypes = [
+      { name: 'Salario', description: 'Ingresos por trabajo dependiente', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Negocio Propio', description: 'Ingresos por actividad empresarial', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Freelance', description: 'Trabajos independientes y servicios profesionales', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Inversiones', description: 'Rendimientos de inversiones, dividendos', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Alquiler', description: 'Ingresos por alquiler de propiedades', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Bonos y Comisiones', description: 'Bonificaciones, comisiones por ventas', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Regalos y Donaciones', description: 'Dinero recibido como regalo', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Venta de Activos', description: 'Venta de bienes, propiedades, vehículos', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Reembolsos', description: 'Devoluciones y reembolsos', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Pensión/Jubilación', description: 'Ingresos por pensión o jubilación', isActive: true, isSystem: true, created_by_id: null },
+      { name: 'Otros Ingresos', description: 'Ingresos varios no categorizados', isActive: true, isSystem: true, created_by_id: null },
+    ];
+
+    for (const type of incomeTypes) {
+      await incomeTypeRepository.save(type);
+    }
+
+    console.log('✅ Created', incomeTypes.length, 'income types');
 
     console.log('\n========================================');
     console.log('🎉 Seed completed successfully!');
     console.log('========================================');
-    console.log('Test user credentials:');
-    console.log('Email: rodrigo1r@hotmail.com');
-    console.log('Password: admin123');
+    console.log('📊 Summary:');
+    console.log('  - Expense Types:', savedTypes.length);
+    console.log('  - Expense Details:', detailCount);
+    console.log('  - Income Types:', incomeTypes.length);
     console.log('========================================\n');
 
     await AppDataSource.destroy();
@@ -137,9 +214,10 @@ export async function runSeed(configService: ConfigService) {
     return {
       success: true,
       message: 'Database seeded successfully',
-      credentials: {
-        email: 'rodrigo1r@hotmail.com',
-        password: 'admin123',
+      stats: {
+        expenseTypes: savedTypes.length,
+        expenseDetails: detailCount,
+        incomeTypes: incomeTypes.length,
       },
     };
   } catch (error) {
