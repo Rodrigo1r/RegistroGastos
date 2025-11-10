@@ -71,9 +71,9 @@ export class User {
   }
 
   // Método para obtener días restantes de licencia
-  getRemainingDays(): number {
+  getRemainingDays(): number | null {
     if (this.licenseType === 'full' || this.licenseType === 'premium') {
-      return -1; // Ilimitado
+      return null; // Ilimitado (no aplica)
     }
 
     if (!this.licenseEndDate) {

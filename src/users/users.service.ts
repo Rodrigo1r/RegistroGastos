@@ -29,12 +29,20 @@ export class UsersService {
     const user = this.userRepository.create(createUserDto);
     await this.userRepository.save(user);
     const { password, ...result } = user;
-    return result;
+    return {
+      ...result,
+      isLicenseActive: user.isLicenseActive(),
+      remainingDays: user.getRemainingDays(),
+    };
   }
 
   async findAll() {
     const users = await this.userRepository.find();
-    return users.map(({ password, ...user }) => user);
+    return users.map(({ password, ...user }) => ({
+      ...user,
+      isLicenseActive: user.isLicenseActive(),
+      remainingDays: user.getRemainingDays(),
+    }));
   }
 
   async findOne(id: string) {
@@ -47,7 +55,11 @@ export class UsersService {
     }
 
     const { password, ...result } = user;
-    return result;
+    return {
+      ...result,
+      isLicenseActive: user.isLicenseActive(),
+      remainingDays: user.getRemainingDays(),
+    };
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
@@ -74,7 +86,11 @@ export class UsersService {
     await this.userRepository.save(user);
 
     const { password, ...result } = user;
-    return result;
+    return {
+      ...result,
+      isLicenseActive: user.isLicenseActive(),
+      remainingDays: user.getRemainingDays(),
+    };
   }
 
   async remove(id: string) {
